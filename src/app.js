@@ -1,6 +1,7 @@
 // Configuração de servidor express
 
 import express from 'express';
+import path from 'path';
 import routes from './route';
 
 import './database';
@@ -16,6 +17,10 @@ class App {
     middleswares() {
         // preparar a aplicação para receber json
         this.server.use(express.json());
+        this.server.use(
+            '/files',
+            express.static(path.resolve(__dirname, '..', 'temp', 'uploads'))
+        );
     }
 
     routes() {
