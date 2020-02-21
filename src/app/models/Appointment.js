@@ -1,5 +1,4 @@
 import Sequelize, { Model } from 'sequelize';
-import bcrypt from 'bcryptjs';
 
 class Appointment extends Model {
     static init(sequelize) {
@@ -7,12 +6,6 @@ class Appointment extends Model {
             {
                 date: Sequelize.DATE,
                 canceled_at: Sequelize.DATE,
-                url: {
-                    type: Sequelize.VIRTUAL,
-                    get() {
-                        return `http://localhost:3333/files/${this.path}`;
-                    },
-                },
             },
             {
                 sequelize,
