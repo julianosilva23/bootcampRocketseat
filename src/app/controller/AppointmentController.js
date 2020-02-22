@@ -1,8 +1,10 @@
 import * as Yup from 'yup';
-import { startOfHour, parseISO, isBefore } from 'date-fns';
+import { startOfHour, parseISO, isBefore, format } from 'date-fns';
+import pt from 'date-fns/locale/pt';
 import Appointment from '../models/Appointment';
 import User from '../models/User';
 import File from '../models/File';
+import Notification from '../schemas/Notification';
 
 class AppointmentController {
     async index(req, res) {
@@ -48,6 +50,7 @@ class AppointmentController {
 
         /**
          * Check if provider_id is a provider
+         * TODO check user is diferent than provider
          */
 
         const isProvider = await User.findOne({
@@ -56,7 +59,7 @@ class AppointmentController {
 
         if (!isProvider) {
             return res.status(401).json({
-                error: 'You ccan only create appointments with providers',
+                error: 'You can only create appointments with providers',
             });
         }
 
@@ -70,7 +73,7 @@ class AppointmentController {
                 .status(400)
                 .json({ error: 'Past dates are not permitted' });
         }
-        console.log(hourStart);
+
         /**
          * Check date availability
          */
@@ -88,6 +91,20 @@ class AppointmentController {
             user_id: req.userId,
             provider_id,
             date: hourStart,
+        });
+
+        const user = await User.findByPk(req.userId);
+        const formattedDate = format(hourStart, "dd 'de' MMMM', às' H:mm'h'", {
+            locale: pt,
+        });
+
+        /**
+         * Notify appointment provider
+         * Não armazenar relacionamentos e sim o conteúdo 'puro'
+         */
+        await Notification.create({
+            content: `Nov agendamento de ${user.name} para dia ${formattedDate}`,
+            user: provider_id,
         });
 
         return res.json({ appointment });
